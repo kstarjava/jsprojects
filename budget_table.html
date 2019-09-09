@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Budget Calculator
+	</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+
+
+
+<body class="bg-success text-white">
+<div class="bg-info text-white">
+<h2>Campaign Table</h2>
+	<div class="container">
+	<table class="table table-striped">
+	<tr>
+		<th>Today's Date</th>
+		<th>Days Left in Month</th>
+		<th>Total Daily Budget</th>
+	</tr>
+	<tr>
+		<td id="currentdate"></td>
+		<td id="daysleft"></td>
+		<td id="dailybudget"></td>
+	</tr>
+	</div>
+	
+</div>
+<div class="container">
+	<h3>Client Information</h3>
+<p>Enter current budget</p>
+<input type="number" id="clientbudget" value="100" oninput="this.value = Math.abs(this.value)" min="0" onchange="update()"/>
+</div>
+<div class="container">
+<form>
+<h3>Select the number of campaigns</h3>
+<select id="mySelect" onchange="campaignNumber()">
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5" selected="selected">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>  
+</select>
+<button onclick="resetCampaigns()" class="btn btn-primary">Reset</button>
+</form>
+</div>
+<br>
+<div class="container">
+<table id="inputcontainer" class="table">
+  <tr>
+    <th>Priority</th>
+    <th>Ratio</th> 
+    <th>Daily Budget</th>
+  </tr>
+ </table>
+</div>
+<p id="totaldisplay"></p>
+  
+<script type="text/javascript">
+window.onload = function() { createInputs(); update();};
+function campaignNumber() {resetCampaigns();createInputs(); update();}
+function resetCampaigns(){
+	
+
+var inpCont = document.getElementById("inputcontainer");
+var rowCount = inpCont.rows.length;
+        for (var i = rowCount - 1; i > 0; i--) {
+            inpCont.deleteRow(i);
+        }
+}
+
+function createInputs(){
+//Delete current inputs
+//resetCampaigns();
+
+//Create new campaigns
+/*var inputcontainer = document.createElement("div");
+inputcontainer.setAttribute("id","inputcontainer");
+document.body.appendChild(inputcontainer);*/
+var inputcontainer = document.getElementById("inputcontainer");
+var x = document.getElementById("mySelect").value;
+var i;
+for (i = 0; i < x; i++) {
+    var idVal = "priority" + i;
+	var newrow = document.createElement("TR");
+	var in_data = document.createElement("TD");
+	var input = document.createElement("INPUT");
+	input.setAttribute("type","number");	//Create input field for each priority
+	input.setAttribute("id",idVal);
+	input.setAttribute("class","form-control");
+	input.setAttribute("name","priority");
+	input.setAttribute("onchange","update()");
+	input.setAttribute("value", "1");
+	input.setAttribute("oninput","this.value = Math.abs(this.value)"); //Stops user from entering negative values 
+	in_data.appendChild(input);
+	
+	//Create td for each ratio
+	var ridVal = "ratio" + i;
+	var ratio_data = document.createElement("TD");
+	ratio_data.setAttribute("id",ridVal);
+	ratio_data.setAttribute("name","ratio");
+	
+	//Create td for each value
+	var vidVal = "value" + i;
+	var value_data = document.createElement("TD");
+	value_data.setAttribute("id",vidVal);
+	value_data.setAttribute("name","value");
+	
+	
+	newrow.appendChild(in_data);
+	newrow.appendChild(ratio_data);
+	newrow.appendChild(value_data);
+	inputcontainer.appendChild(newrow);
+	
+}
+}
+
+function getSum(){
+	var arr = document.getElementsByName('priority');
+	//var mainDiv = document.getElementById("inputcontainer");
+	//var c = mainDiv.childElementCount();
+	var c = arr.length;
+	var sum = 0;
+	var i;
+	for(i=0;i<c;i++){
+		if(parseFloat(arr[i].value)){
+            sum += parseFloat(arr[i].value);
+		}
+	}
+
+	//document.getElementById("totaldisplay").innerHTML = sum;
+	return sum;
+	
+}
+
+function update(){
+//Reload Date and Days left
+loadDate();
+
+//Recalculate daily budget given days left
+var budget = parseFloat(document.getElementById("clientbudget").value);
+var daysleft = getRemainingDays();
+//document.getElementById("daysleft").value;
+var db = parseFloat(budget/daysleft);
+db = db.toFixed(2);
+console.log(daysleft);
+console.log(budget);
+console.log(db);
+document.getElementById("dailybudget").innerHTML=db;
+
+//Find current sum
+var sum = getSum();
+console.log(sum);
+
+//Get budget left from clientbudget
+//var budget = parseFloat(document.getElementById("clientbudget").value);
+
+//Cycle through each priority and calculate ratio and value
+var arr = document.getElementsByName('priority');
+var c = arr.length;
+var ratio;
+var val;
+var rID;
+var vID;
+var py;
+var i;
+	for(i=0;i<c;i++){
+		if(py = parseFloat(arr[i].value)){
+			ratio = parseFloat(py/sum);
+			console.log(ratio);
+			val = parseFloat(db*ratio);
+			console.log(val);
+		}
+		rID = "ratio" + i;
+		vID = "value" + i;
+		var ratio2dp = ratio.toFixed(2);
+		var val2dp = val.toFixed(2);
+		document.getElementById(rID).innerHTML = ratio2dp;
+		document.getElementById(vID).innerHTML = val2dp;
+			
+	}
+
+}
+
+function loadDate(){
+	var d = new Date();
+	document.getElementById("currentdate").innerHTML = d.toDateString();
+ 
+ //Get Remaining days and Update <p> tag
+ var daysremaining = getRemainingDays();
+ document.getElementById("daysleft").innerHTML = daysremaining;
+ 
+ }
+ 
+ function getRemainingDays(){
+	//Get last day and today
+	var d = new Date();
+	var lastDay = parseInt((new Date(d.getFullYear(), d.getMonth() + 1, 0)).getDate());
+	var today = parseInt(d.getDate());
+	var daysremaining = (lastDay - today);
+	console.log(daysremaining);
+	return daysremaining;
+	
+}
+ 
+ 
+</script>
+  
+
+</body>
+</html>
